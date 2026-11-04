@@ -1,0 +1,29 @@
+# 保活 workflow：防止 GitHub 因仓库 60 天无动态而停用定时任务
+# 专用于 Changtan/Auto-Renew-HidenCloud 的 renew.yml
+#
+# 使用方法：
+#   1. 把这个文件上传到仓库的 .github/workflows/keepalive.yml
+#      （注意：是 .github/workflows 目录下，不是仓库根目录）
+#   2. commit 并 push —— 这一次 push 本身就算仓库动态，60 天倒计时立即重置
+#   3. 之后它每 14 天跑一次，自动保活 renew.yml
+
+name: Keepalive
+
+on:
+  schedule:
+    - cron: '0 0 */14 * *'  # 每 14 天跑一次，远小于 60 天期限
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  keepalive:
+    name: Keepalive Workflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gautamkrishnar/keepalive-workflow@v2
+        with:
+          # renew.yml 是本仓库的真实文件名，已核实
+          workflow_files: "renew.yml"
